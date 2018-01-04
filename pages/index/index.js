@@ -19,6 +19,9 @@ var snakeHead = {
   h:20
 };
 
+//身体对象
+var snakeBodys = [];
+
 //手指方向
 var direction = null;
 
@@ -57,10 +60,33 @@ Page({
        //帧数
        var frameNum = 0;
 
+      //画画函数
+       function draw(obj){
+          context.setFillStyle(obj.color);
+          context.beginPath();
+          context.rect(obj.x, obj.y, obj.w, obj.h);
+          context.closePath();
+          context.fill();
+       }
+
        function animate(){
          frameNum++;
 
          if(frameNum % 20 == 0){
+           //向蛇身体数组添加一个上一个位置(身体对象)
+           snakeBodys.push({
+             x: snakeHead.x,
+             y: snakeHead.y,
+             w: 20,
+             h: 20,
+             color: "#00ff00"
+           });
+
+           if (snakeBodys.length > 4) {
+             //移除不用的身体位置，移除数组的第一位元素，现在有4节身体
+             snakeBodys.shift();
+           }
+
            //根据方向改变坐标值 
            switch (snakeDirection) {
              case "left":
@@ -76,15 +102,19 @@ Page({
                snakeHead.y += snakeHead.h;
                break;
            }
+          
          }
 
 
-         //先设置
-          context.setFillStyle(snakeHead.color);
-          context.beginPath();
-          context.rect(snakeHead.x, snakeHead.y, snakeHead.w, snakeHead.h);
-          context.closePath();
-          context.fill();
+         //设置蛇头
+          draw(snakeHead);
+
+          //设置蛇身
+          for(var i=0; i < snakeBodys.length;i++){
+            var snakeBody = snakeBodys[i];
+            draw(snakeBody); 
+          }  
+
 
           //再画
           wx.drawCanvas({
