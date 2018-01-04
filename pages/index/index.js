@@ -22,6 +22,16 @@ var snakeHead = {
 //身体对象
 var snakeBodys = [];
 
+//食物对象
+var foods = [];
+
+//窗体宽高
+var windowWidth = 0;
+var windowHeight = 0;
+
+//是否碰撞上，用于确定是否删除
+var collideBool = true;
+
 //手指方向
 var direction = null;
 
@@ -69,6 +79,27 @@ Page({
           context.fill();
        }
 
+      //碰撞函数
+      function collide(obj1, obj2) {
+        var l1 = obj1.x;
+        var r1 = l1 + obj1.w;
+        var t1 = obj1.y;
+        var b1 = t1 + obj1.h;
+
+        var l2 = obj2.x;
+        var r2 = l2 + obj2.w;
+        var t2 = obj2.y;
+        var b2 = t2 + obj2.h;
+
+        if(r1 > l2 && l1 < r2 && b1 > t2 && t1 < b2){
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      
+
        function animate(){
          frameNum++;
 
@@ -82,9 +113,15 @@ Page({
              color: "#00ff00"
            });
 
-           if (snakeBodys.length > 4) {
-             //移除不用的身体位置，移除数组的第一位元素，现在有4节身体
-             snakeBodys.shift();
+           if (snakeBodys.length > 6) {
+
+             if(collideBool){
+               //移除不用的身体位置，移除数组的第一位元素，现在有4节身体
+               snakeBodys.shift();
+             } else {
+               collideBool = true;
+             }
+             
            }
 
            //根据方向改变坐标值 
@@ -115,6 +152,16 @@ Page({
             draw(snakeBody); 
           }  
 
+          //设置食物
+          for(var i = 0; i < foods.length; i++){
+            var foodObj = foods[i];
+            draw(foodObj);
+            if(collide(snakeHead, foodObj)){
+              // console.log('撞上了');
+              collideBool = false;
+              foodObj.reset();
+            }
+          }
 
           //再画
           wx.drawCanvas({
@@ -124,6 +171,44 @@ Page({
 
           requestAnimationFrame(animate);
        }
-       animate();
+
+      //随机
+      function rand(min, max){
+        return parseInt(Math.random()*(max-min)) + min;
+      }
+
+      function Food() {
+        this.x = rand(0, windowWidth);
+        this.y = rand(0, windowHeight);
+
+        var w = rand(10, 20);
+        this.w = w;
+        this.h = w;
+        this.color = "rgb(" + rand(0, 255) + ", " + rand(0, 255) + ", " + rand(0, 255) +")";
+
+        this.reset = function(){
+          this.x = rand(0, windowWidth);
+          this.y = rand(0, windowHeight);
+          this.color = "rgb(" + rand(0, 255) + ", " + rand(0, 255) + ", " + rand(0, 255) + ")";
+        }
+      }
+
+      //构造食物对象
+      wx.getSystemInfo({
+        success: function (res) {
+
+          windowWidth = res.windowWidth;
+          windowHeight = res.windowHeight;
+
+          for (var i = 0; i < 20; i++) {
+            var foodObj = new Food();
+            foods.push(foodObj);
+          }
+          animate();
+        }
+      })
+
+      
+      
   }
 })
