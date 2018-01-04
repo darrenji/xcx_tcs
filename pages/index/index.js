@@ -19,6 +19,12 @@ var snakeHead = {
   h:20
 };
 
+//手指方向
+var direction = null;
+
+//蛇头方向
+var snakeDirection = "right";
+
 Page({
   canvasStart:function(e){
     startX = e.touches[0].x;
@@ -32,20 +38,47 @@ Page({
     Y = moveY - startY;
 
     if(Math.abs(X) > Math.abs(Y) && X > 0){
-      console.log('moving right');
+      direction = "right";
     } else if (Math.abs(X) > Math.abs(Y) && X < 0){
-      console.log('moving left');
+      direction = "left";
     } else if(Math.abs(Y) > Math.abs(X) && Y > 0) {
-      console.log('moving down');
+      direction = "bottom";
     } else if (Math.abs(Y) > Math.abs(X) && Y < 0) {
-      console.log('moving top');
+      direction="top";
     }
+  },
+  canvasEnd: function(e){
+    snakeDirection = direction;
   },
   onReady: function(){
        //获取画布上的上下文
        var context = wx.createContext();
 
+       //帧数
+       var frameNum = 0;
+
        function animate(){
+         frameNum++;
+
+         if(frameNum % 20 == 0){
+           //根据方向改变坐标值 
+           switch (snakeDirection) {
+             case "left":
+               snakeHead.x -= snakeHead.w;
+               break;
+             case "right":
+               snakeHead.x += snakeHead.w;
+               break;
+             case "top":
+               snakeHead.y -= snakeHead.h;
+               break;
+             case "bottom":
+               snakeHead.y += snakeHead.h;
+               break;
+           }
+         }
+
+
          //先设置
           context.setFillStyle(snakeHead.color);
           context.beginPath();
